@@ -5,9 +5,12 @@ const sha1 = require('sha1');
 const upload = multer({ storage: multer.memoryStorage() });
 
 // Domoticz Settings
-const domoticzUrl = "192.168.5.27";
+const domoticzUrl = "192.168.5.28";
 const domoticzIp = 8080;
-const deviceIdx = 132
+const deviceIdx = 132;
+
+// Array of Plex Players to listen for
+var players = ["CORBIN","abc123"];
 
 const app = express();
 const port = 11000;
@@ -18,31 +21,33 @@ app.listen(port, () => {
 
 //
 // routes
-
 app.post('/', upload.single('thumb'), function (req, res, next) {
     const payload = JSON.parse(req.body.payload);
-    const isVideo = (payload.Metadata.librarySectionType === 'movie' || payload.Metadata.librarySectionType === 'show');
-    const isAudio = (payload.Metadata.librarySectionType === 'artist');
-    const key = sha1(payload.Server.uuid + payload.Metadata.ratingKey);
+    if (players.includes(payload.Player.title)) {
 
-    // missing required properties
-    if (!payload.user || !payload.Metadata || !(isAudio || isVideo)) {
-        return res.sendStatus(400);
-    }
+        const isVideo = (payload.Metadata.librarySectionType === 'movie' || payload.Metadata.librarySectionType === 'show');
+        const isAudio = (payload.Metadata.librarySectionType === 'artist');
+        const key = sha1(payload.Server.uuid + payload.Metadata.ratingKey);    
 
-    // console.log(payload);
+        // missing required properties
+        if (!payload.user || !payload.Metadata || !(isAudio || isVideo)) {
+            return res.sendStatus(400);
+        }
+        //console.log(payload);
     
-    if (payload.event === 'media.play' || payload.event === 'media.rate') {
-        // there is an image attached
-        // uncomment the following line to save the image
-        // writeImage(key + '.jpg', req.file.buffer);
+        if (payload.event === 'media.play' || payload.event === 'media.rate') {
+            // there is an image attached
+            // uncomment the following line to save the image
+            // writeImage(key + '.jpg', req.file.buffer);
+        }
+
+        var svalue = payload.event.replace("media.", "") + ": " + formatTitle(payload.Metadata) + " - " + formatSubtitle(payload.Metadata);
+        request.get("http://" + domoticzUrl + ":" + domoticzIp + "/json.htm?type=command&param=udevice&idx=" + deviceIdx + "&nvalue=0&svalue=" + svalue)
+        .on('error', function (err) {
+            console.log('error sending to Domoticz');
+        });
+
     }
-
-    //var nvalue = 0;
-    //if (payload.event === 'media.play' || payload.event === 'media.resume' || payload.event === 'media.scrobble') { nvalue = 1; }
-    var svalue = payload.event.replace("media.", "") + ": " + formatTitle(payload.Metadata) + " - " + formatSubtitle(payload.Metadata);
-    request.get("http://" + domoticzUrl + ":" + domoticzIp + "/json.htm?type=command&param=udevice&idx=" + deviceIdx + "&nvalue=0&svalue=" + svalue);    
-
     res.sendStatus(200);
 
 });
