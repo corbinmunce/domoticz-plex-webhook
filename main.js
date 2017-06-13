@@ -7,10 +7,11 @@ const upload = multer({ storage: multer.memoryStorage() });
 // Domoticz Settings
 const domoticzUrl = "192.168.5.28";
 const domoticzIp = 8080;
-const deviceIdx = 132;
 
-// Array of Plex Players to listen for
-var players = ["CORBIN","abc123"];
+var players = [];
+players.push({ name: "CORBIN", idx: 132 });
+players.push({ name: "Plex Web (Chrome)", idx: 134 });
+players.push({ name: "Chromecast", idx: 135 });
 
 const app = express();
 const port = 11000;
@@ -19,11 +20,18 @@ app.listen(port, () => {
     console.log(`Express app running at http://localhost:${port}`);
 });
 
-//
 // routes
 app.post('/', upload.single('thumb'), function (req, res, next) {
     const payload = JSON.parse(req.body.payload);
-    if (players.includes(payload.Player.title)) {
+
+    var idx;
+    try {
+        idx = players.find(x => x.name === payload.Player.title).idx;
+    } catch (Exception) {
+        console.log("error");
+    }
+    console.log(idx);
+    if (idx != undefined) {
 
         const isVideo = (payload.Metadata.librarySectionType === 'movie' || payload.Metadata.librarySectionType === 'show');
         const isAudio = (payload.Metadata.librarySectionType === 'artist');
@@ -42,7 +50,7 @@ app.post('/', upload.single('thumb'), function (req, res, next) {
         }
 
         var svalue = payload.event.replace("media.", "") + ": " + formatTitle(payload.Metadata) + " - " + formatSubtitle(payload.Metadata);
-        request.get("http://" + domoticzUrl + ":" + domoticzIp + "/json.htm?type=command&param=udevice&idx=" + deviceIdx + "&nvalue=0&svalue=" + svalue)
+        request.get("http://" + domoticzUrl + ":" + domoticzIp + "/json.htm?type=command&param=udevice&idx=" + idx + "&nvalue=0&svalue=" + svalue)
         .on('error', function (err) {
             console.log('error sending to Domoticz');
         });
