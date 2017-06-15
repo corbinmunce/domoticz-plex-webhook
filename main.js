@@ -9,12 +9,17 @@ const domoticzUrl = "192.168.5.28";
 const domoticzIp = 8080;
 
 var players = [];
-players.push({ name: "CORBIN", idx: 132 });
-players.push({ name: "Plex Web (Chrome)", idx: 134 });
-players.push({ name: "Chromecast", idx: 135 });
+players.push({ name: "CORBIN", idx: 132, timer: null });
+players.push({ name: "Plex Web (Chrome)", idx: 134, timer: null });
+players.push({ name: "Chromecast", idx: 135, timer: null });
 
 const app = express();
 const port = 11000;
+
+const audioTimeoutMinutes = 10; // 10
+const videoTimeoutMinutes = 180; // if no response received for 3 hours, set the device to stop
+
+//var timeout = null;
 
 app.listen(port, () => {
     console.log(`Express app running at http://localhost:${port}`);
@@ -30,7 +35,7 @@ app.post('/', upload.single('thumb'), function (req, res, next) {
     } catch (Exception) {
         console.log("error");
     }
-    console.log(idx);
+
     if (idx != undefined) {
 
         const isVideo = (payload.Metadata.librarySectionType === 'movie' || payload.Metadata.librarySectionType === 'show');
@@ -41,8 +46,7 @@ app.post('/', upload.single('thumb'), function (req, res, next) {
         if (!payload.user || !payload.Metadata || !(isAudio || isVideo)) {
             return res.sendStatus(400);
         }
-        //console.log(payload);
-    
+
         if (payload.event === 'media.play' || payload.event === 'media.rate') {
             // there is an image attached
             // uncomment the following line to save the image
@@ -55,14 +59,30 @@ app.post('/', upload.single('thumb'), function (req, res, next) {
             console.log('error sending to Domoticz');
         });
 
+        // use a timeout to set status to stopped if there is no update for n minutes
+        // keep separate timeouts for each player
+        clearTimeout(players.find(x => x.name === payload.Player.title).timer);
+        var timeoutMinutes = audioTimeoutMinutes;
+        if (isVideo) {
+            timeoutMinutes = videoTimeoutMinutes
+        }
+        players.find(x => x.name === payload.Player.title).timer = setTimeout(setDomoticzStopped, timeoutMinutes * 60000, idx);
+
     }
+
     res.sendStatus(200);
 
 });
 
 
-//
-// error handlers
+function setDomoticzStopped(idx) {
+    console.log('stopping ' + idx);
+    request.get("http://" + domoticzUrl + ":" + domoticzIp + "/json.htm?type=command&param=udevice&idx=" + idx + "&nvalue=0&svalue=stop")
+    .on('error', function (err) {
+        console.log('error sending to Domoticz');
+    });
+}
+
 
 app.use((req, res, next) => {
     const err = new Error('Not Found');
@@ -74,9 +94,6 @@ app.use((err, req, res, next) => {
     res.status(err.status || 500);
     res.send(err.message);
 });
-
-//
-// helpers
 
 function writeImage(fileName, buffer) {
     var fs = require('fs');
@@ -92,7 +109,6 @@ function writeImage(fileName, buffer) {
         });
     });
 }
-
 
 function formatTitle(metadata) {
     if (metadata.grandparentTitle) {
@@ -127,8 +143,3 @@ function formatSubtitle(metadata) {
 
     return ret;
 }
-
-
-
-
-
