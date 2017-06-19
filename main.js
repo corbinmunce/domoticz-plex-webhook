@@ -14,7 +14,7 @@ players.push({ name: "Plex Web (Chrome)", idx: 134, timer: null });
 players.push({ name: "Chromecast", idx: 135, timer: null });
 
 const app = express();
-const port = 11000;
+const port = 80;
 
 const audioTimeoutMinutes = 10; // 10
 const videoTimeoutMinutes = 180; // if no response received for 3 hours, set the device to stop
