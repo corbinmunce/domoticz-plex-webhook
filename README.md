@@ -30,4 +30,6 @@ Run the script:
 node main.js
 ```
 
-Add a webhook in Plex to point to the server your are running main.js from.  eg http://192.168.5.28/11000
+And then add a webhook https://support.plex.tv/hc/en-us/articles/115002267687-Webhooks in Plex to point to the server your are running main.js from.  eg http://192.168.5.28/11000
+
+Once you have verified that it is running correctly from the command line, you can setup to run automatically by adding domoticzPlex to /etc/init.d https://www.linux.com/learn/managing-linux-daemons-init-scripts

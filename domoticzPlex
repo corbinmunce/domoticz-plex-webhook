@@ -1,0 +1,63 @@
+#! /bin/sh
+# /etc/init.d/test
+### BEGIN INIT INFO
+# Provides:          test
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Example initscript
+# Description:       This file should be used to construct scripts to be
+#                    placed in /etc/init.d.
+### END INIT INFO
+
+# Carry out specific functions when asked to by the system
+case "$1" in
+   start)
+    echo "Starting main.js"
+    # run application you want to start
+    node /home/pi/domoticz-plex-webhook/main.js
+   ;;
+   stop)
+    echo "Stopping main.js"
+    # kill application you want to stop
+    killall -9 node
+    # Not a great approach for running
+    # multiple node instances
+    ;;
+  *)
+    echo "Usage: /etc/init.d/domoticzPlex {start|stop}"
+    exit 1
+    ;;
+esac
+
+exit 0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                                                                                [ Read 35 lines ]
+^G Get Help                             ^O WriteOut                             ^R Read File                            ^Y Prev Page                            ^K Cut Text                             ^C Cur Pos
+^X Exit                                 ^J Justify                              ^W Where Is                             ^V Next Page                            ^U UnCut Text                           ^T To Spell
