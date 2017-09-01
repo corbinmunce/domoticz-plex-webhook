@@ -1,12 +1,15 @@
 # domoticz-plex-webhook
-Provides an endpoint for Plex Webhooks to send to Domotiz home automation software
+Provides an endpoint for Plex Webhooks to send to Domotiz home automation software.  Supports multiple Plex clients
+
+Example usage is to control lights based on a movie being played, paused or stopped.
 
 ## Requirements
 * Domoticz https://www.domoticz.com/
-* Node.js https://nodejs.org/en/
+* Node.js https://nodejs.org/en/ (Tested with v7.10)
 * Plex with Plex Pass https://www.plex.tv/features/plex-pass/
 
 ## Setup
+
 ```
 git clone https://github.com/corbinmunce/domoticz-plex-webhook.git
 cd domoticz-plex-webhook

@@ -12,11 +12,12 @@ var players = [];
 players.push({ name: "CORBIN", idx: 132, timer: null });
 players.push({ name: "Plex Web (Chrome)", idx: 134, timer: null });
 players.push({ name: "Chromecast", idx: 135, timer: null });
+players.push({ name: "Mi Box", idx: 163, timer: null });
 
 const app = express();
 const port = 80;
 
-const audioTimeoutMinutes = 10; // 10
+const audioTimeoutMinutes = 10; // 10 - use a short timeout for audio
 const videoTimeoutMinutes = 180; // if no response received for 3 hours, set the device to stop
 
 //var timeout = null;
